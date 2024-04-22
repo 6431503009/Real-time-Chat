@@ -1,0 +1,72 @@
+<!chat html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatchat</title>
+    <link rel="stylesheet" href="./css/chat.css" />
+  </head>
+  <body>
+   
+    <!-- กล่องเเชท -->
+    <div class="chat-container">
+      <ul id="messages"></ul>
+      <form action="" id="form">
+        <input
+          type="text"
+          id="input"
+          autocomplete="off"
+          placeholder="Type your message..."
+        />
+        <button id="button"><i class="fas fa-paper-plane"></i>Send</button>
+      </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+ let name;
+  while (true) {
+    name = window.prompt("Enter your name:", "");
+    if (name) {
+      break;
+    } else {
+      alert("Please enter your name.");
+    }
+  }
+
+  const socket = io();
+  const messages = document.getElementById("messages");
+  const form = document.getElementById("form");
+  const input = document.getElementById("input");
+  const userID = Date.now();
+
+  socket.emit("newuser", name);
+
+  form.addEventListener("submit", handleFormSubmit);
+  socket.on("chat message", handleIncomingMessage);
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    if (input.value) {
+      socket.emit("chat message", {
+        name: name,
+        msg: input.value,
+        user: userID,
+      });
+      input.value = "";
+    }
+  }
+
+  function handleIncomingMessage(msgObject) {
+    const message = document.createElement("li");
+    const messageItem = document.createElement("span");
+    messageItem.textContent = `${msgObject.name}: ${msgObject.msg}`;
+    if (msgObject.user === userID) {
+      message.classList.add("right");
+    }
+    message.appendChild(messageItem);
+    messages.appendChild(message);
+  }
+    </script>
+  </body>
+</html>
